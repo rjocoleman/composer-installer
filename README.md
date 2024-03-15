@@ -34,7 +34,5 @@ See below for a complete list of supported types, and choose the appropriate one
     - Use for [Invoice Templates](https://docs.blesta.com/display/dev/Invoice+Templates)
 - **blesta-report**
     - Use for Reports
-- **blesta-language**
-    - Used only for [blesta/language](https://github.com/blesta/language)
 
 Now list your extension with [packagist](http://packagist.org) (the default composer repository) and anyone can install your extension with composer!
