@@ -28,7 +28,7 @@ class BlestaInstallerTest extends TestCase
     }
 
     /**
-     * @covers ::getLocations
+     * Test getLocations property
      */
     public function testGetLocations(): void
     {

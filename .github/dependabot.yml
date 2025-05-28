@@ -5,7 +5,7 @@ updates:
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 10
-    target-branch: "main"
+    target-branch: "master"
     versioning-strategy: "auto"
     allow:
       - dependency-type: "direct"
@@ -19,7 +19,7 @@ updates:
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 10
-    target-branch: "main"
+    target-branch: "master"
     labels:
       - "dependencies"
       - "github-actions"

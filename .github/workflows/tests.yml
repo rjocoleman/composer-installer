@@ -2,9 +2,9 @@ name: Tests
 
 on:
   push:
-    branches: [ main ]
+    branches: [ master ]
   pull_request:
-    branches: [ main ]
+    branches: [ master ]
 
 jobs:
   test:
@@ -26,7 +26,7 @@ jobs:
       with:
         php-version: ${{ matrix.php-versions }}
         extensions: mbstring, intl
-        coverage: xdebug
+        coverage: pcov
 
     - name: Validate composer.json and composer.lock
       run: composer validate --strict
@@ -43,8 +43,8 @@ jobs:
     - name: Install dependencies
       run: composer update ${{ matrix.composer-flags }}
 
-    - name: Run test suite
-      run: composer run-script test
+    - name: Run test suite with coverage
+      run: vendor/bin/phpunit --coverage-text --coverage-clover build/logs/clover.xml
 
     - name: Check coding standards
       run: composer run-script cs-check
@@ -54,3 +54,11 @@ jobs:
 
     - name: Check PHP compatibility
       run: composer run-script compat
+
+    - name: Upload coverage to Coveralls
+      if: matrix.php-versions == '8.4'
+      env:
+        COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        mkdir -p build/logs
+        vendor/bin/php-coveralls --coverage_clover=build/logs/clover.xml -v

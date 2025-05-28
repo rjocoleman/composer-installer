@@ -1,7 +1,7 @@
 # Composer Installer
 
 [![Tests](https://github.com/blesta/composer-installer/actions/workflows/tests.yml/badge.svg)](https://github.com/blesta/composer-installer/actions/workflows/tests.yml)
-[![PHPStan](https://img.shields.io/badge/PHPStan-level%207-brightgreen.svg)](https://phpstan.org/)
+[![Coverage Status](https://coveralls.io/repos/blesta/composer-installer/badge.svg?branch=master&service=github)](https://coveralls.io/github/blesta/composer-installer?branch=master)
 
 A library for installing Blesta extensions using [composer](http://getcomposer.org).
 

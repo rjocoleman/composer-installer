@@ -14,6 +14,7 @@ use Composer\Repository\InstalledRepositoryInterface;
 use InvalidArgumentException;
 use PHPUnit\Framework\MockObject\MockObject;
 use React\Promise\PromiseInterface;
+use RuntimeException;
 
 /**
  * @covers \Blesta\Composer\Installer\InstallerPlugin
@@ -67,8 +68,7 @@ class InstallerPluginTest extends TestCase
     }
 
     /**
-     * @covers ::getInstallPath
-     * @covers ::supportedType
+     * Test getInstallPath throws exception for invalid types
      */
     public function testGetInstallPathException(): void
     {
@@ -84,9 +84,7 @@ class InstallerPluginTest extends TestCase
     }
 
     /**
-     * @covers ::uninstall
-     * @covers ::getInstallPath
-     * @covers ::supportedType
+     * Test uninstall functionality
      */
     public function testUninstall(): void
     {
@@ -118,7 +116,7 @@ class InstallerPluginTest extends TestCase
     }
 
     /**
-     * @covers ::uninstall
+     * Test uninstall throws exception when package not found
      */
     public function testUninstallException(): void
     {
@@ -197,5 +195,98 @@ class InstallerPluginTest extends TestCase
         // Test invalid types
         $this->assertFalse($method->invoke($installer, 'invalid'));
         $this->assertFalse($method->invoke($installer, 'blesta')); // No hyphen
+        $this->assertFalse($method->invoke($installer, 'unknown-type')); // Unknown base type with hyphen
+    }
+
+    /**
+     * Test getInstallPath with a custom type that doesn't have an installer class
+     */
+    public function testGetInstallPathWithMissingInstallerClass(): void
+    {
+        // Override the supportedTypes array to have a non-existent installer class
+        $installer = new class ($this->io, $this->composer) extends InstallerPlugin {
+            protected array $supportedTypes = [
+                'custom' => 'NonExistentInstaller'
+            ];
+
+            protected function supportedType(string $type): string|false
+            {
+                if ($type === 'test-invalid-type') {
+                    return 'custom';
+                }
+                return false;
+            }
+        };
+
+        $package = $this->createMock(PackageInterface::class);
+        $package->expects($this->once())
+            ->method('getType')
+            ->willReturn('test-invalid-type');
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('Failed to create installer for package type "test-invalid-type":');
+
+        $installer->getInstallPath($package);
+    }
+
+    /**
+     * Test uninstall with exception during getInstallPath
+     */
+    public function testUninstallWithGetInstallPathException(): void
+    {
+        $package = $this->createMock(PackageInterface::class);
+        $package->expects($this->once())
+            ->method('getType')
+            ->willReturn('invalid-type');
+        $package->expects($this->once())
+            ->method('getName')
+            ->willReturn('test/package');
+
+        $repo = $this->createMock(InstalledRepositoryInterface::class);
+        $repo->expects($this->once())
+            ->method('hasPackage')
+            ->willReturn(true);
+        $repo->expects($this->once())
+            ->method('removePackage')
+            ->with($package);
+
+        $installer = new InstallerPlugin($this->io, $this->composer);
+
+        // Expect error to be written
+        $this->io->expects($this->once())
+            ->method('writeError')
+            ->with($this->stringContains('Error during uninstall of test/package:'));
+
+        $result = $installer->uninstall($repo, $package);
+        $this->assertNull($result);
+    }
+
+    /**
+     * Test supports method with exception during installer creation
+     */
+    public function testSupportsWithException(): void
+    {
+        // Create a custom installer that will throw an exception
+        $installer = new class ($this->io, $this->composer) extends InstallerPlugin {
+            protected array $supportedTypes = [
+                'custom' => 'NonExistentInstaller'
+            ];
+
+            protected function supportedType(string $type): string|false
+            {
+                if ($type === 'test-invalid-type') {
+                    return 'custom';
+                }
+                return false;
+            }
+        };
+
+        // Expect error to be written
+        $this->io->expects($this->once())
+            ->method('writeError')
+            ->with($this->stringContains('Error checking support for package type "test-invalid-type":'));
+
+        $result = $installer->supports('test-invalid-type');
+        $this->assertFalse($result);
     }
 }

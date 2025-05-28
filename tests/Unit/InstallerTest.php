@@ -37,7 +37,7 @@ class InstallerTest extends TestCase
     }
 
     /**
-     * @covers ::activate
+     * Test activate method
      */
     public function testActivate(): void
     {
@@ -68,7 +68,7 @@ class InstallerTest extends TestCase
     }
 
     /**
-     * @covers ::deactivate
+     * Test deactivate method
      */
     public function testDeactivate(): void
     {
@@ -89,7 +89,7 @@ class InstallerTest extends TestCase
     }
 
     /**
-     * @covers ::uninstall
+     * Test uninstall method
      */
     public function testUninstall(): void
     {
